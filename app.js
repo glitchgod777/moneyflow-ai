@@ -21,12 +21,10 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-let userId = null;
-let authLoaded = false;
-
 // =========================
 // ESTADO
 // =========================
+let userId = null;
 let transacoes = [];
 let meta = 2000;
 let tipoSelecionado = 'gasto';
@@ -69,28 +67,27 @@ function loginGoogle() {
 }
 
 // =========================
-// RETORNO REDIRECT
+// 🔥 CORREÇÃO PRINCIPAL MOBILE
 // =========================
 auth.getRedirectResult()
   .then(result => {
     if (result.user) {
-      msg(`👋 ${result.user.displayName} logado`, 'bot');
+      msg(`👋 ${result.user.displayName}`, 'bot');
     }
   })
   .catch(error => {
     console.error(error);
-    msg('❌ ' + error.message, 'bot');
   });
 
 // =========================
-// AUTH STATE
+// AUTH STATE (FONTE REAL)
 // =========================
 auth.onAuthStateChanged(user => {
-  authLoaded = true;
-
   if (user) {
     userId = user.uid;
+
     msg(`👋 ${user.displayName}`, 'bot');
+
     carregarDados();
   } else {
     userId = null;
@@ -172,6 +169,7 @@ function carregarDados() {
     .then(doc => {
       if (doc.exists) {
         const data = doc.data();
+
         transacoes = data.transacoes || [];
         meta = data.meta || 2000;
 
@@ -319,11 +317,17 @@ function toggleRelatorio() {
   if (ativo) atualizar();
 }
 
-// fechar clicando fora
-document.getElementById('overlay').addEventListener('click', () => {
-  document.getElementById('painel').classList.remove('ativo');
-  document.getElementById('overlay').classList.remove('ativo');
-});
+// =========================
+// OVERLAY CLICK (SAFE)
+// =========================
+const overlayEl = document.getElementById('overlay');
+
+if (overlayEl) {
+  overlayEl.addEventListener('click', () => {
+    document.getElementById('painel').classList.remove('ativo');
+    overlayEl.classList.remove('ativo');
+  });
+}
 
 // =========================
 // PAINEL DADOS
@@ -376,9 +380,7 @@ window.onload = ()=>{
 
   iniciarLoadingFake();
 
-  setTimeout(()=>{
-    if(!authLoaded){
-      msg('⏳ Verificando login...', 'bot');
-    }
-  },800);
+  // garante overlay desligado
+  const overlay = document.getElementById('overlay');
+  if (overlay) overlay.classList.remove('ativo');
 };
