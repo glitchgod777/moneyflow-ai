@@ -288,3 +288,11 @@ canvas {
   from { opacity: 0; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+@media (max-width: 480px) {
+  .app {
+    width: 100%;
+    height: 100vh;
+    border-radius: 0;
+  }
+}

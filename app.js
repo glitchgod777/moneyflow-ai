@@ -17,6 +17,7 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 let userId = null;
+let authLoaded = false;
 
 // =========================
 // ESTADO
@@ -52,7 +53,7 @@ function loginGoogle() {
 }
 
 // =========================
-// TRATA RETORNO DO LOGIN (IMPORTANTE)
+// RETORNO LOGIN
 // =========================
 auth.getRedirectResult()
   .then(result => {
@@ -69,11 +70,14 @@ auth.getRedirectResult()
 // AUTH STATE
 // =========================
 auth.onAuthStateChanged(user => {
+  authLoaded = true;
+
   if (user) {
     userId = user.uid;
     msg(`👋 ${user.displayName} logado`, 'bot');
     carregarDados();
   } else {
+    userId = null;
     msg('🔐 Faça login para salvar seus dados', 'bot');
   }
 });
@@ -143,7 +147,7 @@ function enviar() {
   const match = texto.match(/^(\d+([.,]\d+)?)\s(.+)/);
 
   if (!match) {
-    msg('❌ Formato inválido. Ex: 50 mercado', 'bot');
+    msg('❌ Use: 50 mercado', 'bot');
     return;
   }
 
@@ -182,26 +186,6 @@ function processarComando(texto) {
     return true;
   }
 
-  if (t.includes('comandos')) {
-    msg(`
-      📜 comandos:<br>
-      meta 2000<br>
-      quanto gastei<br>
-      reset
-    `, 'bot');
-    return true;
-  }
-
-  if (t === 'reset') {
-    if (!confirm('Tem certeza que quer apagar tudo?')) return true;
-
-    transacoes = [];
-    salvar();
-    atualizar();
-    msg('🧹 resetado', 'bot');
-    return true;
-  }
-
   if (t.includes('quanto gastei')) {
     const total = transacoes
       .filter(x => x.tipo === 'gasto')
@@ -211,7 +195,29 @@ function processarComando(texto) {
     return true;
   }
 
+  if (t === 'reset') {
+    resetTudo();
+    return true;
+  }
+
   return false;
+}
+
+// =========================
+// RESET (BOTÃO + CHAT)
+// =========================
+function resetTudo() {
+  if (!confirm('Deseja apagar tudo?')) return;
+
+  transacoes = [];
+  salvar();
+  atualizar();
+  msg('🧹 tudo limpo', 'bot');
+}
+
+// botão do HTML (compatibilidade)
+function confirmarReset() {
+  resetTudo();
 }
 
 // =========================
@@ -291,5 +297,10 @@ input.addEventListener('keypress', e => {
 window.onload = () => {
   setTipo('gasto');
   atualizar();
-  msg('🤖 Sistema pronto. Faça login.', 'bot');
+
+  setTimeout(() => {
+    if (!authLoaded) {
+      msg('⏳ Verificando login...', 'bot');
+    }
+  }, 800);
 };
