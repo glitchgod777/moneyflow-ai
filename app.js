@@ -1,3 +1,4 @@
+
 // =========================
 // FIREBASE CONFIG
 // =========================
@@ -43,16 +44,26 @@ function msg(texto, tipo) {
 }
 
 // =========================
-// LOGIN GOOGLE (mais estável)
+// LOGIN GOOGLE (MOBILE OK)
 // =========================
 function loginGoogle() {
   const provider = new firebase.auth.GoogleAuthProvider();
-
-  auth.signInWithRedirect(provider).catch(err => {
-    console.error(err);
-    msg('❌ ' + err.message, 'bot');
-  });
+  auth.signInWithRedirect(provider);
 }
+
+// =========================
+// TRATA RETORNO DO LOGIN (IMPORTANTE)
+// =========================
+auth.getRedirectResult()
+  .then(result => {
+    if (result.user) {
+      msg(`👋 ${result.user.displayName} logado`, 'bot');
+    }
+  })
+  .catch(error => {
+    console.error(error);
+    msg('❌ ' + error.message, 'bot');
+  });
 
 // =========================
 // AUTH STATE
@@ -68,7 +79,7 @@ auth.onAuthStateChanged(user => {
 });
 
 // =========================
-// SALVAR FIREBASE (MERGE FIX)
+// SALVAR FIREBASE
 // =========================
 function salvar() {
   if (!userId) return;
@@ -129,7 +140,6 @@ function enviar() {
 
   if (processarComando(texto)) return;
 
-  // melhor parsing (mais seguro)
   const match = texto.match(/^(\d+([.,]\d+)?)\s(.+)/);
 
   if (!match) {
@@ -138,7 +148,7 @@ function enviar() {
   }
 
   const valor = parseFloat(match[1].replace(',', '.'));
-  const descricao = match[3] || 'Geral';
+  const descricao = match[3];
 
   transacoes.push({
     valor,
@@ -166,7 +176,7 @@ function processarComando(texto) {
       meta = valor;
       salvar();
       atualizar();
-      msg(`🎯 Meta definida: R$ ${meta}`, 'bot');
+      msg(`🎯 Meta: R$ ${meta}`, 'bot');
     }
 
     return true;
@@ -183,7 +193,12 @@ function processarComando(texto) {
   }
 
   if (t === 'reset') {
-    confirmarReset();
+    if (!confirm('Tem certeza que quer apagar tudo?')) return true;
+
+    transacoes = [];
+    salvar();
+    atualizar();
+    msg('🧹 resetado', 'bot');
     return true;
   }
 
@@ -192,40 +207,11 @@ function processarComando(texto) {
       .filter(x => x.tipo === 'gasto')
       .reduce((a, b) => a + b.valor, 0);
 
-    msg(`💸 Total gasto: R$ ${total.toFixed(2)}`, 'bot');
+    msg(`💸 R$ ${total.toFixed(2)}`, 'bot');
     return true;
   }
 
   return false;
-}
-
-// =========================
-// RESET (mais seguro)
-// =========================
-function confirmarReset() {
-  if (!confirm('Tem certeza que deseja apagar tudo?')) return;
-
-  transacoes = [];
-  salvar();
-  atualizar();
-  msg('🧹 Dados resetados', 'bot');
-}
-
-// =========================
-// SALDO RESTANTE
-// =========================
-function saldoRestante() {
-  const gastos = transacoes
-    .filter(x => x.tipo === 'gasto')
-    .reduce((a, b) => a + b.valor, 0);
-
-  const restante = meta - gastos;
-
-  if (restante >= 0) {
-    msg(`💰 Restante: R$ ${restante.toFixed(2)}`, 'bot');
-  } else {
-    msg(`🚨 Excedeu: R$ ${Math.abs(restante).toFixed(2)}`, 'bot');
-  }
 }
 
 // =========================
@@ -262,7 +248,7 @@ function toggleRelatorio() {
 }
 
 // =========================
-// PAINEL UPDATE
+// PAINEL
 // =========================
 function atualizarPainel(ganhos, gastos, saldo) {
   document.getElementById('ganhosResumo').innerText = `R$ ${ganhos.toFixed(2)}`;
@@ -293,12 +279,15 @@ function renderGrafico(ganhos, gastos) {
 }
 
 // =========================
-// INIT
+// INPUT ENTER
 // =========================
 input.addEventListener('keypress', e => {
   if (e.key === 'Enter') enviar();
 });
 
+// =========================
+// INIT
+// =========================
 window.onload = () => {
   setTipo('gasto');
   atualizar();
