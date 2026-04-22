@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MoneyFlow AI</title>
+
+  <!-- Firebase (OBRIGATÓRIO) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <!-- Chart -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <header class="header">
+    <h1>MoneyFlow</h1>
+
+    <div class="header-actions">
+      <button onclick="loginGoogle()">🔐</button>
+      <button onclick="toggleRelatorio()">📊</button>
+      <button onclick="confirmarReset()">🧹</button>
+    </div>
+  </header>
+
+  <!-- DASHBOARD -->
+  <section class="dashboard">
+    <div class="card">
+      <span>Ganhos</span>
+      <strong id="ganhos">R$ 0,00</strong>
+    </div>
+
+    <div class="card">
+      <span>Gastos</span>
+      <strong id="gastos">R$ 0,00</strong>
+    </div>
+
+    <div class="card">
+      <span>Saldo</span>
+      <strong id="saldo">R$ 0,00</strong>
+    </div>
+  </section>
+
+  <!-- META -->
+  <section class="meta">
+    <div class="meta-text">
+      Meta mensal: <strong id="metaTxt">R$ 0,00</strong>
+    </div>
+
+    <div class="progress">
+      <div id="barraMeta" class="progress-bar"></div>
+    </div>
+  </section>
+
+  <!-- TIPO -->
+  <section class="tipo-area">
+    <button id="btnGanho" onclick="setTipo('ganho')">➕ Ganho</button>
+    <button id="btnGasto" class="active" onclick="setTipo('gasto')">➖ Gasto</button>
+  </section>
+
+  <!-- CHAT -->
+  <section id="chat" class="chat"></section>
+
+  <!-- INPUT -->
+  <section class="input-area">
+    <input id="input" placeholder="Ex: 50 mercado">
+    <button onclick="enviar()">OK</button>
+  </section>
+
+</div>
+
+<!-- ================= PAINEL LATERAL ================= -->
+<div id="painel" class="painel">
+
+  <div class="painel-header">
+    <h2>Relatório</h2>
+    <button onclick="toggleRelatorio()">✖</button>
+  </div>
+
+  <div class="painel-content">
+
+    <div class="resumo">
+      <p>Ganhos: <span id="ganhosResumo">R$ 0,00</span></p>
+      <p>Gastos: <span id="gastosResumo">R$ 0,00</span></p>
+      <p>Saldo: <span id="saldoResumo">R$ 0,00</span></p>
+    </div>
+
+    <canvas id="graficoPainel"></canvas>
+
+  </div>
+
+</div>
+
+<!-- JS -->
+<script src="app.js"></script>
+
+</body>
+</html>

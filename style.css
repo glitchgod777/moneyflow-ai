@@ -1,0 +1,290 @@
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ROOT */
+:root {
+  --bg: #050505;
+  --card: rgba(255,255,255,0.05);
+  --border: rgba(255,255,255,0.08);
+  --primary: #00f2ff;
+  --secondary: #7000ff;
+  --gain: #00ff88;
+  --loss: #ff4d4d;
+  --text: #e0e0e0;
+}
+
+/* BODY */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: radial-gradient(circle at center, #111, #000);
+  color: var(--text);
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* APP */
+.app {
+  width: 420px;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+  backdrop-filter: blur(20px);
+  border-radius: 25px;
+  overflow: hidden;
+  box-shadow: 0 0 60px rgba(0,0,0,0.8);
+}
+
+/* HEADER */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border-bottom: 1px solid var(--border);
+}
+
+.header h1 {
+  font-size: 1rem;
+  background: linear-gradient(90deg,var(--secondary),var(--primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.header button {
+  background: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.header button:hover {
+  background: var(--primary);
+  color: black;
+}
+
+/* DASHBOARD */
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 10px;
+  padding: 15px;
+}
+
+.card {
+  background: rgba(0,0,0,0.4);
+  border-radius: 12px;
+  padding: 10px;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+
+.card span {
+  font-size: 0.7rem;
+  opacity: 0.6;
+}
+
+.card strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.95rem;
+}
+
+/* META */
+.meta {
+  padding: 0 15px 15px;
+}
+
+.meta-text {
+  font-size: 0.75rem;
+  margin-bottom: 6px;
+}
+
+.progress {
+  height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg,var(--secondary),var(--primary));
+  transition: width 0.3s ease;
+}
+
+/* TIPO */
+.tipo-area {
+  display: flex;
+  gap: 10px;
+  padding: 10px 15px;
+}
+
+.tipo-area button {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  background: rgba(255,255,255,0.05);
+  color: white;
+  transition: 0.2s;
+}
+
+.tipo-area button:hover {
+  transform: scale(1.05);
+}
+
+.tipo-area button.active {
+  background: linear-gradient(45deg,var(--secondary),var(--primary));
+}
+
+/* CHAT */
+.chat {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* SCROLL BONITO */
+.chat::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.2);
+  border-radius: 10px;
+}
+
+/* MENSAGENS */
+.msg {
+  padding: 10px 12px;
+  border-radius: 12px;
+  max-width: 70%;
+  font-size: 0.85rem;
+  animation: fadeIn 0.2s ease;
+}
+
+.user {
+  background: var(--secondary);
+  align-self: flex-end;
+}
+
+.bot {
+  background: rgba(255,255,255,0.08);
+}
+
+/* INPUT */
+.input-area {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.input-area input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(255,255,255,0.05);
+  color: white;
+  outline: none;
+}
+
+.input-area button {
+  padding: 10px 15px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(45deg,var(--secondary),var(--primary));
+  color: white;
+  cursor: pointer;
+}
+
+/* ===================== */
+/* PAINEL LATERAL */
+/* ===================== */
+
+.painel {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 360px;
+  height: 100%;
+  background: #0d0d0d;
+  box-shadow: -15px 0 50px rgba(0,0,0,0.9);
+  transition: 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  z-index: 999;
+}
+
+.painel.ativo {
+  right: 0;
+}
+
+/* HEADER */
+.painel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border-bottom: 1px solid var(--border);
+}
+
+.painel-header h2 {
+  font-size: 1rem;
+}
+
+.painel-header button {
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+/* CONTENT */
+.painel-content {
+  padding: 15px;
+}
+
+/* RESUMO */
+.resumo {
+  margin-bottom: 15px;
+}
+
+.resumo p {
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+}
+
+/* CANVAS */
+canvas {
+  max-width: 100%;
+  margin-top: 10px;
+}
+
+/* ANIMAÇÃO */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
