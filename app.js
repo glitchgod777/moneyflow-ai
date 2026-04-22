@@ -1,10 +1,7 @@
-
 // =========================
-// VARIÁVEIS LOADING
+// LOADING VARS
 // =========================
-let loadingScreen = null;
-let progressBar = null;
-let loadingText = null;
+let loadingScreen, progressBar, loadingText;
 let progress = 0;
 
 // =========================
@@ -57,15 +54,22 @@ function msg(texto, tipo) {
 }
 
 // =========================
-// LOGIN GOOGLE (MOBILE)
+// LOGIN GOOGLE (SMART)
 // =========================
 function loginGoogle() {
   const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithRedirect(provider);
+
+  if (/Android|iPhone|iPad/i.test(navigator.userAgent)) {
+    auth.signInWithRedirect(provider);
+  } else {
+    auth.signInWithPopup(provider).catch(err => {
+      msg('❌ ' + err.message, 'bot');
+    });
+  }
 }
 
 // =========================
-// RETORNO LOGIN
+// RETORNO REDIRECT
 // =========================
 auth.getRedirectResult()
   .then(result => {
@@ -86,11 +90,11 @@ auth.onAuthStateChanged(user => {
 
   if (user) {
     userId = user.uid;
-    msg(`👋 ${user.displayName} logado`, 'bot');
+    msg(`👋 ${user.displayName}`, 'bot');
     carregarDados();
   } else {
     userId = null;
-    msg('🔐 Faça login para salvar seus dados', 'bot');
+    msg('🔐 Faça login', 'bot');
   }
 
   esconderLoading();
@@ -103,7 +107,7 @@ function iniciarLoadingFake() {
   const etapas = [
     { pct: 20, txt: 'Conectando...' },
     { pct: 40, txt: 'Carregando sistema...' },
-    { pct: 60, txt: 'Sincronizando dados...' },
+    { pct: 60, txt: 'Sincronizando...' },
     { pct: 80, txt: 'Finalizando...' }
   ];
 
@@ -115,11 +119,9 @@ function iniciarLoadingFake() {
       return;
     }
 
-    const etapa = etapas[i];
-
-    progress = etapa.pct;
+    progress = etapas[i].pct;
     progressBar.style.width = progress + '%';
-    loadingText.innerText = etapa.txt;
+    loadingText.innerText = etapas[i].txt;
 
     i++;
   }, 500);
@@ -141,12 +143,11 @@ function esconderLoading() {
     setTimeout(() => {
       loadingScreen.style.display = 'none';
     }, 400);
-
   }, 500);
 }
 
 // =========================
-// SALVAR FIREBASE
+// FIREBASE SAVE
 // =========================
 function salvar() {
   if (!userId) return;
@@ -160,7 +161,7 @@ function salvar() {
 }
 
 // =========================
-// CARREGAR DADOS
+// FIREBASE LOAD
 // =========================
 function carregarDados() {
   if (!userId) return;
@@ -171,7 +172,6 @@ function carregarDados() {
     .then(doc => {
       if (doc.exists) {
         const data = doc.data();
-
         transacoes = data.transacoes || [];
         meta = data.meta || 2000;
 
@@ -227,7 +227,7 @@ function enviar() {
   salvar();
   atualizar();
 
-  msg(`✅ ${descricao} registrado`, 'bot');
+  msg(`✅ ${descricao}`, 'bot');
 }
 
 // =========================
@@ -237,7 +237,7 @@ function processarComando(texto) {
   const t = texto.toLowerCase();
 
   if (t.startsWith('meta')) {
-    const valor = parseFloat(t.replace('meta', '').trim());
+    const valor = parseFloat(t.replace('meta','').trim());
 
     if (!isNaN(valor)) {
       meta = valor;
@@ -251,9 +251,9 @@ function processarComando(texto) {
   if (t.includes('quanto gastei')) {
     const total = transacoes
       .filter(x => x.tipo === 'gasto')
-      .reduce((a, b) => a + b.valor, 0);
+      .reduce((a,b)=>a+b.valor,0);
 
-    msg(`💸 R$ ${total.toFixed(2)}`, 'bot');
+    msg(`💸 R$ ${total.toFixed(2)}`,'bot');
     return true;
   }
 
@@ -269,12 +269,12 @@ function processarComando(texto) {
 // RESET
 // =========================
 function resetTudo() {
-  if (!confirm('Deseja apagar tudo?')) return;
+  if (!confirm('Apagar tudo?')) return;
 
   transacoes = [];
   salvar();
   atualizar();
-  msg('🧹 tudo limpo', 'bot');
+  msg('🧹 resetado','bot');
 }
 
 function confirmarReset() {
@@ -286,12 +286,12 @@ function confirmarReset() {
 // =========================
 function atualizar() {
   const ganhos = transacoes
-    .filter(x => x.tipo === 'ganho')
-    .reduce((a, b) => a + b.valor, 0);
+    .filter(x=>x.tipo==='ganho')
+    .reduce((a,b)=>a+b.valor,0);
 
   const gastos = transacoes
-    .filter(x => x.tipo === 'gasto')
-    .reduce((a, b) => a + b.valor, 0);
+    .filter(x=>x.tipo==='gasto')
+    .reduce((a,b)=>a+b.valor,0);
 
   const saldo = ganhos - gastos;
 
@@ -300,14 +300,14 @@ function atualizar() {
   document.getElementById('saldo').innerText = `R$ ${saldo.toFixed(2)}`;
   document.getElementById('metaTxt').innerText = `R$ ${meta.toFixed(2)}`;
 
-  const pct = meta ? Math.min((gastos / meta) * 100, 100) : 0;
+  const pct = meta ? Math.min((gastos/meta)*100,100) : 0;
   document.getElementById('barraMeta').style.width = pct + '%';
 
-  atualizarPainel(ganhos, gastos, saldo);
+  atualizarPainel(ganhos,gastos,saldo);
 }
 
 // =========================
-// PAINEL (iOS)
+// PAINEL
 // =========================
 function toggleRelatorio() {
   const painel = document.getElementById('painel');
@@ -328,29 +328,29 @@ document.getElementById('overlay').addEventListener('click', () => {
 // =========================
 // PAINEL DADOS
 // =========================
-function atualizarPainel(ganhos, gastos, saldo) {
+function atualizarPainel(ganhos,gastos,saldo){
   document.getElementById('ganhosResumo').innerText = `R$ ${ganhos.toFixed(2)}`;
   document.getElementById('gastosResumo').innerText = `R$ ${gastos.toFixed(2)}`;
   document.getElementById('saldoResumo').innerText = `R$ ${saldo.toFixed(2)}`;
 
-  renderGrafico(ganhos, gastos);
+  renderGrafico(ganhos,gastos);
 }
 
 // =========================
 // GRÁFICO
 // =========================
-function renderGrafico(ganhos, gastos) {
+function renderGrafico(ganhos,gastos){
   const ctx = document.getElementById('graficoPainel');
 
-  if (chartPainel) chartPainel.destroy();
+  if(chartPainel) chartPainel.destroy();
 
-  chartPainel = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: ['Ganhos', 'Gastos'],
-      datasets: [{
-        data: [ganhos, gastos],
-        backgroundColor: ['#00ff88', '#ff4d4d']
+  chartPainel = new Chart(ctx,{
+    type:'doughnut',
+    data:{
+      labels:['Ganhos','Gastos'],
+      datasets:[{
+        data:[ganhos,gastos],
+        backgroundColor:['#00ff88','#ff4d4d']
       }]
     }
   });
@@ -359,14 +359,14 @@ function renderGrafico(ganhos, gastos) {
 // =========================
 // ENTER
 // =========================
-input.addEventListener('keypress', e => {
-  if (e.key === 'Enter') enviar();
+input.addEventListener('keypress', e=>{
+  if(e.key==='Enter') enviar();
 });
 
 // =========================
 // INIT
 // =========================
-window.onload = () => {
+window.onload = ()=>{
   loadingScreen = document.getElementById('loadingScreen');
   progressBar = document.getElementById('progressBar');
   loadingText = document.getElementById('loadingText');
@@ -376,9 +376,9 @@ window.onload = () => {
 
   iniciarLoadingFake();
 
-  setTimeout(() => {
-    if (!authLoaded) {
+  setTimeout(()=>{
+    if(!authLoaded){
       msg('⏳ Verificando login...', 'bot');
     }
-  }, 800);
+  },800);
 };
