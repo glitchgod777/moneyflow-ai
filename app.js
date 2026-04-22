@@ -1,5 +1,13 @@
 
 // =========================
+// VARIÁVEIS LOADING
+// =========================
+let loadingScreen = null;
+let progressBar = null;
+let loadingText = null;
+let progress = 0;
+
+// =========================
 // FIREBASE CONFIG
 // =========================
 const firebaseConfig = {
@@ -41,11 +49,15 @@ function msg(texto, tipo) {
   div.className = 'msg ' + tipo;
   div.innerHTML = texto;
   chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
+
+  chat.scrollTo({
+    top: chat.scrollHeight,
+    behavior: 'smooth'
+  });
 }
 
 // =========================
-// LOGIN GOOGLE (MOBILE OK)
+// LOGIN GOOGLE (MOBILE)
 // =========================
 function loginGoogle() {
   const provider = new firebase.auth.GoogleAuthProvider();
@@ -80,7 +92,58 @@ auth.onAuthStateChanged(user => {
     userId = null;
     msg('🔐 Faça login para salvar seus dados', 'bot');
   }
+
+  esconderLoading();
 });
+
+// =========================
+// LOADING FAKE
+// =========================
+function iniciarLoadingFake() {
+  const etapas = [
+    { pct: 20, txt: 'Conectando...' },
+    { pct: 40, txt: 'Carregando sistema...' },
+    { pct: 60, txt: 'Sincronizando dados...' },
+    { pct: 80, txt: 'Finalizando...' }
+  ];
+
+  let i = 0;
+
+  const intervalo = setInterval(() => {
+    if (i >= etapas.length) {
+      clearInterval(intervalo);
+      return;
+    }
+
+    const etapa = etapas[i];
+
+    progress = etapa.pct;
+    progressBar.style.width = progress + '%';
+    loadingText.innerText = etapa.txt;
+
+    i++;
+  }, 500);
+}
+
+// =========================
+// ESCONDER LOADING
+// =========================
+function esconderLoading() {
+  if (!loadingScreen) return;
+
+  progress = 100;
+  progressBar.style.width = '100%';
+  loadingText.innerText = 'Pronto 🚀';
+
+  setTimeout(() => {
+    loadingScreen.classList.add('hide');
+
+    setTimeout(() => {
+      loadingScreen.style.display = 'none';
+    }, 400);
+
+  }, 500);
+}
 
 // =========================
 // SALVAR FIREBASE
@@ -182,7 +245,6 @@ function processarComando(texto) {
       atualizar();
       msg(`🎯 Meta: R$ ${meta}`, 'bot');
     }
-
     return true;
   }
 
@@ -204,7 +266,7 @@ function processarComando(texto) {
 }
 
 // =========================
-// RESET (BOTÃO + CHAT)
+// RESET
 // =========================
 function resetTudo() {
   if (!confirm('Deseja apagar tudo?')) return;
@@ -215,7 +277,6 @@ function resetTudo() {
   msg('🧹 tudo limpo', 'bot');
 }
 
-// botão do HTML (compatibilidade)
 function confirmarReset() {
   resetTudo();
 }
@@ -246,15 +307,26 @@ function atualizar() {
 }
 
 // =========================
-// PAINEL
+// PAINEL (iOS)
 // =========================
 function toggleRelatorio() {
-  document.getElementById('painel').classList.toggle('ativo');
-  atualizar();
+  const painel = document.getElementById('painel');
+  const overlay = document.getElementById('overlay');
+
+  const ativo = painel.classList.toggle('ativo');
+  overlay.classList.toggle('ativo');
+
+  if (ativo) atualizar();
 }
 
+// fechar clicando fora
+document.getElementById('overlay').addEventListener('click', () => {
+  document.getElementById('painel').classList.remove('ativo');
+  document.getElementById('overlay').classList.remove('ativo');
+});
+
 // =========================
-// PAINEL
+// PAINEL DADOS
 // =========================
 function atualizarPainel(ganhos, gastos, saldo) {
   document.getElementById('ganhosResumo').innerText = `R$ ${ganhos.toFixed(2)}`;
@@ -285,7 +357,7 @@ function renderGrafico(ganhos, gastos) {
 }
 
 // =========================
-// INPUT ENTER
+// ENTER
 // =========================
 input.addEventListener('keypress', e => {
   if (e.key === 'Enter') enviar();
@@ -295,8 +367,14 @@ input.addEventListener('keypress', e => {
 // INIT
 // =========================
 window.onload = () => {
+  loadingScreen = document.getElementById('loadingScreen');
+  progressBar = document.getElementById('progressBar');
+  loadingText = document.getElementById('loadingText');
+
   setTipo('gasto');
   atualizar();
+
+  iniciarLoadingFake();
 
   setTimeout(() => {
     if (!authLoaded) {

@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MoneyFlow AI</title>
 
-  <!-- Firebase (OBRIGATÓRIO) -->
+  <!-- FIREBASE -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-  <!-- Chart -->
+  <!-- CHART -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <!-- CSS -->
@@ -19,6 +19,22 @@
 
 <body>
 
+<!-- ================= LOADING ================= -->
+<div id="loadingScreen">
+  <div class="loader">
+
+    <div class="logo">MoneyFlow</div>
+
+    <div class="status" id="loadingText">Iniciando...</div>
+
+    <div class="progress-container">
+      <div id="progressBar"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
 <div class="app">
 
   <!-- HEADER -->
@@ -78,7 +94,10 @@
 
 </div>
 
-<!-- ================= PAINEL LATERAL ================= -->
+<!-- ================= OVERLAY (FUNDO BLUR) ================= -->
+<div id="overlay"></div>
+
+<!-- ================= PAINEL ================= -->
 <div id="painel" class="painel">
 
   <div class="painel-header">
